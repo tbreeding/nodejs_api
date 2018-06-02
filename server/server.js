@@ -17,11 +17,13 @@ APP.post('/todos', (req, res) => {
     .then(doc => {
         res.send(doc);
     }, err => {
-        res.send("Unable to complete request", err);
+        res.status(400).send(err);
     })
 
 });
 
 APP.listen(3000, () => {
     console.log('Started on port 3000');
-})
+});
+
+module.exports = { APP };
