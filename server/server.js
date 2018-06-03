@@ -1,14 +1,15 @@
 require('./config/config');
 
 const _ = require('lodash');
-const {ObjectID} = require('mongodb');
+const { ObjectID } = require('mongodb');
 const EXPRESS = require('express');
 const BODY_PARSER = require('body-parser');
 
 
-const {MONGOOSE} = require('./db/mongoose');
+const { MONGOOSE } = require('./db/mongoose');
 const { Todo } = require('./models/todo');
 const { User } = require('./models/user');
+const { authenticate } = require('./middleware/authenticate');
 
 const APP = EXPRESS();
 
@@ -94,10 +95,6 @@ APP.patch('/todos/:id', (req, res) => {
     })
 });
 
-APP.listen(PORT, () => {
-    console.log(`Started on port ${PORT}`);
-});
-
 APP.post('/users', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
     let user = new User(body);
@@ -110,6 +107,14 @@ APP.post('/users', (req, res) => {
     .catch(err => {
         res.status(400).send(err);
     })
+});
+
+APP.get('/users/me', authenticate, (req,res) => {
+    res.send(req.user);
+});
+
+APP.listen(PORT, () => {
+    console.log(`Started on port ${PORT}`);
 });
 
 module.exports = { APP };
