@@ -4,8 +4,12 @@
   "description": "Building a NodeJS API with MongoDB",
   "main": "index.js",
   "scripts": {
+    "start": "node server/server.js",
     "test": "node node_modules/mocha/bin/mocha server/**/*.test.js",
     "test-watch": "nodemon --exec \"npm test\""
+  },
+  "engines": {
+    "node": "10.2.1"
   },
   "repository": {
     "type": "git",

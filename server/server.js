@@ -8,6 +8,8 @@ const { User } = require('./models/user');
 
 const APP = EXPRESS();
 
+const PORT = process.env.PORT || 3000;
+
 APP.use(BODY_PARSER.json());
 
 APP.post('/todos', (req, res) => {
@@ -47,8 +49,8 @@ APP.get('/todos/:id', (req, res) => {
     };
 });
 
-APP.listen(3000, () => {
-    console.log('Started on port 3000');
+APP.listen(PORT, () => {
+    console.log(`Started on port ${PORT}`);
 });
 
 module.exports = { APP };
