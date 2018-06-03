@@ -39,11 +39,11 @@ APP.get('/todos/:id', (req, res) => {
             if(todo) {
                 res.send({todo});
             } else {
-                res.status(400).send();
+                res.status(404).send(); //not found
             }
         }).catch(err => res.send(err));
     } else {
-        res.status(404).send();
+        res.status(404).send(); //bad request
     };
 });
 

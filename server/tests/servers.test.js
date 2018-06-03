@@ -1,14 +1,19 @@
 const expect = require('expect');
 const REQUEST = require('supertest');
+const { ObjectID} = require('mongodb');
 
 const {APP} = require('./../server');
 const {Todo} = require('./../models/todo');
 
 const todos = [{
+    _id: new ObjectID(),
     text: 'First test todo'
 }, {
+    _id: new ObjectID(),
     text: 'Second test todo'
 }];
+
+
 
 beforeEach(done => {
     Todo.remove({}).then(() => {
@@ -48,7 +53,7 @@ describe('POST /todos', () => {
             });
     });
     
-    it('should not create todo with invalid body data', (done) => {
+    it('should not create todo with invalid body data', done => {
         REQUEST(APP)
             .post('/todos')
             .send({})
@@ -77,3 +82,34 @@ describe('GET /todos', () => {
             .end(done);
     });
 });
+
+describe('GET /todos/:id', () => {
+    
+    it('should return todo doc', done => {
+        REQUEST(APP)
+            .get(`/todos/${todos[0]._id.toHexString()}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.text).toBe(todos[0].text);
+            })
+            .end(done)
+    });
+
+    it('should return 404 if todo not found', done => {
+        let valid_id = new ObjectID();
+
+        REQUEST(APP)
+            .get(`/todos/${valid_id.toHexString()}`)
+            .expect(404)
+            .end(done);
+    });
+
+    it('should return 404 if ID not valid', done => {
+        let invalid_id = "5b13a09c662e642510495cdc11";
+        REQUEST(APP)
+            .get(`/todos/${invalid_id}`)
+            .expect(404)
+            .end(done);
+    });
+
+})
