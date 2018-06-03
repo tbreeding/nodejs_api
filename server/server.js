@@ -5,6 +5,7 @@ const {ObjectID} = require('mongodb');
 const EXPRESS = require('express');
 const BODY_PARSER = require('body-parser');
 
+
 const {MONGOOSE} = require('./db/mongoose');
 const { Todo } = require('./models/todo');
 const { User } = require('./models/user');
@@ -95,6 +96,20 @@ APP.patch('/todos/:id', (req, res) => {
 
 APP.listen(PORT, () => {
     console.log(`Started on port ${PORT}`);
+});
+
+APP.post('/users', (req, res) => {
+    let body = _.pick(req.body, ['email', 'password']);
+    let user = new User(body);
+    
+    user.save().then(() => {
+        return user.generateAuthToken();
+    }).then(token => {
+        res.header('x-auth', token).send(user);
+    })
+    .catch(err => {
+        res.status(400).send(err);
+    })
 });
 
 module.exports = { APP };
