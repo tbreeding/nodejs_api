@@ -3,6 +3,16 @@ const JWT = require('jsonwebtoken');
 const BCRYPT = require('bcryptjs');
 
 let password = '123abc!';
+let hashed;
+
+BCRYPT.genSalt(10, (err, salt) => {
+    console.log(BCRYPT.hash(password, salt, (err, hash) => {
+        hashed = hash;  
+        console.log(hashed);
+        return hashed;
+    }));
+});
+
 
 // BCRYPT.genSalt(10, (err, salt) => {
 //     BCRYPT.hash(password, salt, (err, hash) => {
@@ -10,7 +20,7 @@ let password = '123abc!';
 //     } )
 // });
 
-var hashedPw = '$2a$10$aViYIpPtIk12bJ6kuF9g0eXPgy/p6Adn9mBK.bvwp3/dgFNb0yvuq'
+let hashedPw = '$2a$10$aViYIpPtIk12bJ6kuF9g0eXPgy/p6Adn9mBK.bvwp3/dgFNb0yvuq'
 
 BCRYPT.compare(password, hashedPw, (err, res) => {
     console.log(res);

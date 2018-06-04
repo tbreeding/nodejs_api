@@ -160,43 +160,25 @@ describe('/todos Test Cases', () => {
               .end(done);
       });
 
-      it('should clear completedAt when todo is not completed', done => {
-          let hexId = todos[1]._id.toHexString();
-          let text = 'new text';
-          REQUEST(APP)
-              .patch(`/todos/${hexId}`)
-              .send({
-                  completed: false,
-                  text,
-                  completedAt: null
-              })
-              .expect(200)
-              .expect((res) => {
-                  expect(res.body.todo.completed).toBe(false);
-                  expect(res.body.todo.text).toBe(text);
-                  expect(res.body.todo.completedAt).toBe(null);
-              })
-              .end(done);
-      });
-
-      // it('should return 404 if todo not found', done => {
-      //     let valid_id = new ObjectID();
-
-      //     REQUEST(APP)
-      //         .patch(`/todos/${valid_id.toHexString()}`)
-      //         .expect(404)
-      //         .end(done);
-      // });
-
-      // it('should return 404 if ID not valid', done => {
-      //     let invalid_id = "5b13a09c662e642510495cdc11";
-      //     REQUEST(APP)
-      //         .patch(`/todos/${invalid_id}`)
-      //         .expect(404)
-      //         .end(done);
-      // });
-
-  });
+        it('should clear completedAt when todo is not completed', done => {
+            let hexId = todos[1]._id.toHexString();
+            let text = 'new text';
+            REQUEST(APP)
+                .patch(`/todos/${hexId}`)
+                .send({
+                    completed: false,
+                    text,
+                    completedAt: null
+                })
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.todo.completed).toBe(false);
+                    expect(res.body.todo.text).toBe(text);
+                    expect(res.body.todo.completedAt).toBe(null);
+                })
+                .end(done);
+        });
+    });
 });
 
 describe('/users Test Cases', () => {
@@ -244,7 +226,7 @@ describe('/users Test Cases', () => {
             expect(!!user).toBe(true);
             expect(user.password == password).toBe(false);
             done();
-          })
+          }).catch(err => done(err));
         });
     });
 
@@ -267,5 +249,51 @@ describe('/users Test Cases', () => {
       .expect(400)
       .end(done)
     });
-  })
+  });
+
+  describe('POST /users/login', () => {
+      it('should login user and return AUTH token', done => {
+        REQUEST(APP)
+            .post('/users/login')
+            .send({
+                email: users[1].email,
+                password: users[1].password
+            })
+            .expect(200)
+            .expect(res => {
+                expect(res.headers['x-auth'] !== null).toBe(true);
+            })
+            .end((err, res) => {
+                if (err) return done(err);
+
+                User.findById(users[1]._id).then(user => {
+                    expect(user.tokens[0].access == 'auth').toBe(true);
+                    expect(user.tokens[0].token == res.headers['x-auth']).toBe(true);
+                    done();
+                }).catch(err => done(err));
+            });
+      });
+
+      it('should reject invalid login', done => {
+        let invalid = 'blah';
+        REQUEST(APP)
+            .post('/users/login')
+            .send({
+                email: users[1].email,
+                password: invalid
+            })
+            .expect(400)
+            .expect(res => {
+                expect(res.headers['x-auth']).toBe(undefined);
+            })
+            .end((err, res) => {
+                if(err) return done(err);
+
+                User.findById(users[1]._id).then(user => {
+                    expect(user.tokens.length).toBe(0);
+                    done();
+                }).catch(err => done(err));
+            })
+      });
+  }); 
 });

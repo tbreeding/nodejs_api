@@ -15,6 +15,14 @@ const APP = EXPRESS();
 
 const PORT = process.env.PORT;
 
+// const hashPass = (password) => {
+//     BCRYPT.genSalt(10, (err, salt) => {
+//         BCRYPT.hash(password, salt, (err, hash) => {
+//             return hash;
+//         });
+//     });
+// }
+
 APP.use(BODY_PARSER.json());
 
 APP.post('/todos', (req, res) => {
@@ -110,6 +118,17 @@ APP.post('/users', (req, res) => {
 
 APP.get('/users/me', authenticate, (req,res) => {
     res.send(req.user);
+});
+
+APP.post('/users/login', (req, res) => {
+    let body = _.pick(req.body, ['email', 'password']);
+    User.findByCredentials(body.email, body.password).then(user => {
+        return user.generateAuthToken().then(token => {
+            res.header('x-auth', token).send(user);
+        });
+    }).catch(err => {
+        res.status(400).send();
+    })
 });
 
 APP.listen(PORT, () => {
