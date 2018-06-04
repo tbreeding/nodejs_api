@@ -130,7 +130,7 @@ describe('/todos Test Cases', () => {
                       }  
                       Todo.findById(hexId)
                       .then(todo => {
-                          expect(todo).toBe(null);
+                          expect(todo).toBeFalsy();
                           done();
                       }).catch(err => done(err));
                   });
@@ -148,7 +148,7 @@ describe('/todos Test Cases', () => {
                     }  
                     Todo.findById(hexId)
                     .then(todo => {
-                        expect(!!todo).toBe(true);
+                        expect(todo).toBeTruthy();
                         done();
                     }).catch(err => done(err));
                 });
@@ -225,7 +225,7 @@ describe('/todos Test Cases', () => {
                 .expect((res) => {
                     expect(res.body.todo.completed).toBe(false);
                     expect(res.body.todo.text).toBe(text);
-                    expect(res.body.todo.completedAt).toBe(null);
+                    expect(res.body.todo.completedAt).toBeFalsy();
                 })
                 .end(done);
         });
@@ -266,8 +266,8 @@ describe('/users Test Cases', () => {
         .send({email, password})
         .expect(200)
         .expect(res => {
-          expect(!!res.headers['x-auth']).toBe(true);
-          expect(!!res.body._id).toBe(true);
+          expect(res.headers['x-auth']).toBeTruthy();
+          expect(res.body._id).toBeTruthy();
           expect(res.body.email).toBe(email);
         })
         .end(err => {
@@ -275,7 +275,7 @@ describe('/users Test Cases', () => {
         
           User.findOne({email}).then(user => {
             expect(!!user).toBe(true);
-            expect(user.password == password).toBe(false);
+            expect(user.password).not.toBe(password);
             done();
           }).catch(err => done(err));
         });
@@ -312,14 +312,18 @@ describe('/users Test Cases', () => {
             })
             .expect(200)
             .expect(res => {
-                expect(res.headers['x-auth'] !== null).toBe(true);
+                expect(res.headers['x-auth']).toBeTruthy();
             })
             .end((err, res) => {
                 if (err) return done(err);
 
                 User.findById(users[1]._id).then(user => {
-                    expect(user.tokens[1].access == 'auth').toBe(true);
-                    expect(user.tokens[1].token == res.headers['x-auth']).toBe(true);
+                    expect(user.toObject().tokens[1]).toMatchObject({
+                        access: 'auth',
+                        token: res.headers['x-auth']
+                    });
+                    // expect(user.tokens[1].access == 'auth').toBe(true);
+                    // expect(user.tokens[1].token == res.headers['x-auth']).toBe(true);
                     done();
                 }).catch(err => done(err));
             });
@@ -335,7 +339,7 @@ describe('/users Test Cases', () => {
             })
             .expect(400)
             .expect(res => {
-                expect(res.headers['x-auth']).toBe(undefined);
+                expect(res.headers['x-auth']).toBeFalsy();
             })
             .end((err, res) => {
                 if(err) return done(err);
